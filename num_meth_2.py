@@ -1,7 +1,7 @@
 import numpy as np 
 from math import pow
 
-N = 4
+#Num = 4
 EPS = pow(10, -6)
 
 def sign(x):
@@ -13,7 +13,7 @@ def sign(x):
 		else:
 			return -1
 
-def gauss_rev(A, b, TF):
+def gauss_rev(A, b, TF, N):
 	#print(A)
 	x = np.array([0. for i in range(N)])
 	if TF == False:
@@ -39,11 +39,11 @@ def gauss_rev(A, b, TF):
 
 np.set_printoptions(threshold=np.nan)
 
-A = np.matrix([[1,-1,1,-1],[-1,5,-3,3],[1,-3,-7,1],[-1,3,1,10]])
-b = np.array([2,-4,-18,-5])
+#A = np.matrix([[1,-1,1,-1],[-1,5,-3,3],[1,-3,-7,1],[-1,3,1,10]])
+#b = np.array([2,-4,-18,-5])
 
 
-def squares_meth():
+def squares_meth(A, b, N):
 
 	S = np.zeros((N,N))
 	D = np.zeros((N,N))
@@ -77,16 +77,17 @@ def squares_meth():
 	#x = np.array([0 for i in range(N)])
 	print(S)
 	print(STD)
-	y = gauss_rev(STD, b, False)
+	y = gauss_rev(STD, b, False, N)
 	print(y)
-	x = gauss_rev(S, y, True)
+	x = gauss_rev(S, y, True, N)
 	print(x)
 	return x
 	
 	
-def jacobi():
+def jacobi(A, b, N):
 	x0 = np.array([b[i]/A[i,i] for i in range(N)])
 	x1 = np.array([0. for i in range(N)])
+	count = 0
 	while np.linalg.norm(x1-x0)>EPS:
 		x0 = x1.copy()
 		x1 = np.array([0. for i in range(N)])
@@ -98,17 +99,30 @@ def jacobi():
 				else:
 					sum -=(A[i,j]/A[i,i])*x0[j]
 			x1[i] = sum + b[i]/A[i,i]
+		count +=1
 		print(x1)
 	y1 = np.array([A[0,j] for j in range(N)])
 
 	#print(y1.dot(x1.transpose())-b[0])
-	return x1
+	return x1, count
 
 def main():
-	x1 = squares_meth()
-	x2 = jacobi()
+	N = 25
+	m = 10
+	A = np.zeros((N,N))
+	b = np.array([pow(i,2) - N for i in range(N)])
+	for i in range(N):
+		for j in range(N):
+			if i != j:
+				A[i,j] = (i+j)/(m+N)
+			else:
+				A[i,i] = N + m + j/m + i/N
+	print(A)
+	print(b)
+	x1 = squares_meth(A, b, N)
+	x2, count = jacobi(A, b, N)
 	print("solution by squares method: ", x1)
-	print("solution by Jacobi method: ", x2)
+	print("solution by Jacobi method: ", x2, "\n" , count)
 
 if __name__ == '__main__':
 
