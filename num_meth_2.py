@@ -14,7 +14,6 @@ def sign(x):
 			return -1
 
 def gauss_rev(A, b, TF, N):
-	#print(A)
 	x = np.array([0. for i in range(N)])
 	if TF == False:
 		sum1 = 0
@@ -22,17 +21,13 @@ def gauss_rev(A, b, TF, N):
 			for j in range(i):
 				sum1 -= (x[j]*A[i,j])
 			x[i] = (sum1 + b[i])/A[i,i]
-			#print(sum + b[i], A[i,i])
 			sum1 = 0
 	else:
 		sum1 = 0
 		for i in reversed(range(N)):
-			for j in range(N):
-				if j == i:
-					continue
+			for j in range(i+1, N):
 				sum1 -= (x[j]*A[i,j])
 			x[i] = (sum1 + b[i])/A[i,i]
-			#print(sum + b[i], A[i,i])
 			sum1 = 0
 	return x
 
@@ -68,19 +63,17 @@ def squares_meth(A, b, N):
 	
 			if not boll:
 				S[i,j] = (A[i,j] - bs)/(D[i,i]*S[i,i])
-		#print(m,bs)
 		m = 0
 		bs = 0
 		boll = True
 	St = S.transpose()
 	STD = St.dot(D)
-	#x = np.array([0 for i in range(N)])
-	print(S)
-	print(STD)
+	#print(S)
+	#print(STD)
 	y = gauss_rev(STD, b, False, N)
-	print(y)
+	#print(y)
 	x = gauss_rev(S, y, True, N)
-	print(x)
+	#print(x)
 	return x
 	
 	
@@ -100,7 +93,7 @@ def jacobi(A, b, N):
 					sum -=(A[i,j]/A[i,i])*x0[j]
 			x1[i] = sum + b[i]/A[i,i]
 		count +=1
-		print(x1)
+		#print(x1)
 	y1 = np.array([A[0,j] for j in range(N)])
 
 	#print(y1.dot(x1.transpose())-b[0])
@@ -117,12 +110,21 @@ def main():
 				A[i,j] = (i+j)/(m+N)
 			else:
 				A[i,i] = N + m + j/m + i/N
-	print(A)
-	print(b)
+	#print(A)
+	#print(b)
 	x1 = squares_meth(A, b, N)
 	x2, count = jacobi(A, b, N)
-	print("solution by squares method: ", x1)
-	print("solution by Jacobi method: ", x2, "\n" , count)
+	A1 = np.linalg.inv(A)
+	print("A = \n", A, "\n","b = \n", b)
+	print("Ax-b = \n", A.dot(x1)-b)
+	print("det(A) = \n", np.linalg.det(A))
+	print("A^-1 = \n", A1)
+	print("A^(-1)*A = \n", A1.dot(A))
+	print("cond(A) = \n", np.linalg.cond(A))
+	#print(np.linalg.solve(A,b))
+	print("solution by squares method: \n", x1)
+	print("solution by Jacobi method: \n", x2, "\n" , count)
+	#print(x2-x1)
 
 if __name__ == '__main__':
 
