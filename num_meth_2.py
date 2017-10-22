@@ -103,6 +103,8 @@ def main():
 	N = 25
 	m = 10
 	A = np.zeros((N,N))
+	E = np.eye(N)
+	print(E)
 	b = np.array([pow(i,2) - N for i in range(N)])
 	for i in range(N):
 		for j in range(N):
@@ -121,6 +123,7 @@ def main():
 	print("A^-1 = \n", A1)
 	print("A^(-1)*A = \n", A1.dot(A))
 	print("cond(A) = \n", np.linalg.cond(A))
+	print((A1.dot(A)- E))
 	#print(np.linalg.solve(A,b))
 	print("solution by squares method: \n", x1)
 	print("solution by Jacobi method: \n", x2, "\n" , count)
