@@ -2,7 +2,36 @@ import numpy as np
 from math import pow
 
 #Num = 4
-EPS = pow(10, -6)
+EPS = pow(10, -10)
+
+"""def cr_ab(A, b):
+	Ab = np.copy(A)
+	print(A, b)
+	#Ab = np.append(Ab, b, axis = 1)
+	Ab = np.column_stack((A, b))
+	return Ab
+"""
+
+def det_trian_matr(A):
+	mul = 1
+	for i in range(np.shape(A)[0]):
+		mul *= A[i,i]
+	return mul
+
+def to_trian(Ab, N):
+	A = Ab
+	for j in range(N-1):
+		m = np.eye(N)
+		for i in range(j, N):
+			if i == j:
+				m[i,i] = 1/A[i,i]
+			else:
+				m[i,j]=-A[i,j]/A[j,j]
+		A = m.dot(A)
+	return A
+
+
+
 
 def sign(x):
 	if x>0:
@@ -100,11 +129,10 @@ def jacobi(A, b, N):
 	return x1, count
 
 def main():
-	N = 25
-	m = 10
+	N = 4
+	m = 4
 	A = np.zeros((N,N))
 	E = np.eye(N)
-	print(E)
 	b = np.array([pow(i,2) - N for i in range(N)])
 	for i in range(N):
 		for j in range(N):
@@ -112,21 +140,37 @@ def main():
 				A[i,j] = (i+j)/(m+N)
 			else:
 				A[i,i] = N + m + j/m + i/N
-	#print(A)
-	#print(b)
+	print(A)
+	Ab = np.column_stack((A,b))
+	gauss_res =to_trian(Ab, N)
+	A11 = gauss_res[:,:-1]
+	b11 = gauss_res[:,-1]
+	print(A11, b11)
+
+	print("_______________________\n",gauss_res)
+	#print(gauss_rev(gauss_res))
+	detA = det_trian_matr(gauss_res)
+	#print(detA, "       ", np.linalg.det(A))
 	x1 = squares_meth(A, b, N)
 	x2, count = jacobi(A, b, N)
 	A1 = np.linalg.inv(A)
+	#print(Ab)
+	print(A)
+	x_p = np.copy(A[0])
+	x_p[0] = 1000
+	print(x_p)
 	print("A = \n", A, "\n","b = \n", b)
-	print("Ax-b = \n", A.dot(x1)-b)
+	"""print("Ax-b = \n", A.dot(x1)-b)
 	print("det(A) = \n", np.linalg.det(A))
 	print("A^-1 = \n", A1)
 	print("A^(-1)*A = \n", A1.dot(A))
 	print("cond(A) = \n", np.linalg.cond(A))
 	print((A1.dot(A)- E))
-	#print(np.linalg.solve(A,b))
+	#print(np.linalg.solve(A,b))"""
+	print("solution by gauss: \n", gauss_rev(A11, b11, True, N))
 	print("solution by squares method: \n", x1)
 	print("solution by Jacobi method: \n", x2, "\n" , count)
+
 	#print(x2-x1)
 
 if __name__ == '__main__':
