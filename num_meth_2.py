@@ -20,18 +20,19 @@ def det_trian_matr(A):
 
 def to_trian(Ab, N):
 	A = Ab
+	mul = 1
 	for j in range(N-1):
 		m = np.eye(N)
 		for i in range(j, N):
 			if i == j:
 				m[i,i] = 1/A[i,i]
+				mul*=A[i,i]
 			else:
 				m[i,j]=-A[i,j]/A[j,j]
 		A = m.dot(A)
-	return A
-
-
-
+	print(A)
+	mul*=A[N-1,N-1]
+	return A, mul
 
 def sign(x):
 	if x>0:
@@ -97,12 +98,8 @@ def squares_meth(A, b, N):
 		boll = True
 	St = S.transpose()
 	STD = St.dot(D)
-	#print(S)
-	#print(STD)
 	y = gauss_rev(STD, b, False, N)
-	#print(y)
 	x = gauss_rev(S, y, True, N)
-	#print(x)
 	return x
 	
 	
@@ -140,17 +137,18 @@ def main():
 				A[i,j] = (i+j)/(m+N)
 			else:
 				A[i,i] = N + m + j/m + i/N
-	print(A)
+	#print(A)
+	#print(np.linalg.det(A))
 	Ab = np.column_stack((A,b))
-	gauss_res =to_trian(Ab, N)
+	gauss_res, detAA =to_trian(Ab, N)
 	A11 = gauss_res[:,:-1]
 	b11 = gauss_res[:,-1]
 	print(A11, b11)
 
 	print("_______________________\n",gauss_res)
 	#print(gauss_rev(gauss_res))
-	detA = det_trian_matr(gauss_res)
-	#print(detA, "       ", np.linalg.det(A))
+	#detA = det_trian_matr(gauss_res)
+	print("________________________\n", detAA)
 	x1 = squares_meth(A, b, N)
 	x2, count = jacobi(A, b, N)
 	A1 = np.linalg.inv(A)
