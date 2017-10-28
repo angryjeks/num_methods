@@ -4,13 +4,26 @@ from math import pow
 #Num = 4
 EPS = pow(10, -10)
 
-"""def cr_ab(A, b):
-	Ab = np.copy(A)
-	print(A, b)
-	#Ab = np.append(Ab, b, axis = 1)
-	Ab = np.column_stack((A, b))
-	return Ab
-"""
+def print_matr(A):
+	s = ""
+	for i in range(np.shape(A)[0]):
+		for j in range(np.shape(A)[1]):
+			s += str(A[i,j].round(5)) + " | "
+		s +="\n"
+	return s
+
+def print_results(f, A, b,x, N):
+	A1 = np.linalg.inv(A)
+	E = np.eye(N)
+	f.write("A = \n" + str(A)+ "\n")
+	f.write("b = \n" + str(b) + "\n")
+	f.write("Ax-b = \n" + str(A.dot(x)-b) +"\n")
+	f.write("det(A) = "+ str(np.linalg.det(A))+"\n")
+	f.write("A^-1 = \n"+ str(A1)+"\n")
+	f.write("A^(-1)*A = \n"+ str(A1.dot(A))+"\n")
+	f.write("cond(A) = "+ str(np.linalg.cond(A))+"\n")
+	f.write(str(A1.dot(A)- E)+"\n")
+	#print(np.linalg.solve(A,b))
 
 def det_trian_matr(A):
 	mul = 1
@@ -126,6 +139,7 @@ def jacobi(A, b, N):
 	return x1, count
 
 def main():
+	f = open('output.txt', 'w')
 	N = 4
 	m = 4
 	A = np.zeros((N,N))
@@ -137,38 +151,31 @@ def main():
 				A[i,j] = (i+j)/(m+N)
 			else:
 				A[i,i] = N + m + j/m + i/N
-	#print(A)
-	#print(np.linalg.det(A))
 	Ab = np.column_stack((A,b))
-	gauss_res, detAA =to_trian(Ab, N)
+	gauss_res, detA =to_trian(Ab, N)
 	A11 = gauss_res[:,:-1]
 	b11 = gauss_res[:,-1]
-	print(A11, b11)
+	#print(A11, b11)
 
-	print("_______________________\n",gauss_res)
+	#f.write("Gauss result:\n" + print_matr(gauss_res))
 	#print(gauss_rev(gauss_res))
 	#detA = det_trian_matr(gauss_res)
-	print("________________________\n", detAA)
+	#print("________________________\n", detA)
 	x1 = squares_meth(A, b, N)
 	x2, count = jacobi(A, b, N)
-	A1 = np.linalg.inv(A)
 	#print(Ab)
-	print(A)
-	x_p = np.copy(A[0])
-	x_p[0] = 1000
-	print(x_p)
-	print("A = \n", A, "\n","b = \n", b)
-	"""print("Ax-b = \n", A.dot(x1)-b)
-	print("det(A) = \n", np.linalg.det(A))
-	print("A^-1 = \n", A1)
-	print("A^(-1)*A = \n", A1.dot(A))
-	print("cond(A) = \n", np.linalg.cond(A))
-	print((A1.dot(A)- E))
-	#print(np.linalg.solve(A,b))"""
-	print("solution by gauss: \n", gauss_rev(A11, b11, True, N))
+	#print(A)
+	#print("A = \n", A, "\n","b = \n", b)
+	""""""
+	print_results(f, A, b, x1, N)
+	gauss_res_final = gauss_rev(A11, b11, True, N)
+	print("solution by gauss: \n", gauss_res_final)
 	print("solution by squares method: \n", x1)
 	print("solution by Jacobi method: \n", x2, "\n" , count)
-
+	f.write("solution by gauss: \n" +str(gauss_res_final) +"\n")
+	f.write("solution by squares method: \n" +str(x1)+"\n")
+	f.write("solution by Jacobi method: \n"+str(x2) + "\n" +"count of iterations = " +str(count)+"\n")
+	f.close()
 	#print(x2-x1)
 
 if __name__ == '__main__':
