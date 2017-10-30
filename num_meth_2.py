@@ -2,7 +2,7 @@ import numpy as np
 from math import pow
 
 #Num = 4
-EPS = pow(10, -10)
+EPS = pow(10, -8)
 
 def print_matr(A):
 	s = ""
@@ -11,6 +11,17 @@ def print_matr(A):
 			s += str(A[i,j].round(5)) + " | "
 		s +="\n"
 	return s
+
+def perturbation(A, b, x, N, perturbation):
+	A1 = np.copy(A)
+	print(A1)
+	for i in range(N):
+		A1[i,i] = A[i,i]*(1.0 + perturbation)
+	print(A1)
+	x1 = squares_meth(A1,b,N)
+	delta = np.linalg.norm(x1-x)/np.linalg.norm(x)
+	delta_matr = np.linalg.norm(A1-A)/np.linalg.norm(A)
+	return delta, delta_matr, x1
 
 def print_results(f, A, b,x, N):
 	A1 = np.linalg.inv(A)
@@ -22,8 +33,7 @@ def print_results(f, A, b,x, N):
 	f.write("A^-1 = \n"+ str(A1)+"\n")
 	f.write("A^(-1)*A = \n"+ str(A1.dot(A))+"\n")
 	f.write("cond(A) = "+ str(np.linalg.cond(A))+"\n")
-	f.write(str(A1.dot(A)- E)+"\n")
-	#print(np.linalg.solve(A,b))
+	f.write("A^(-1)*A - E = " + "\n" + str(A1.dot(A)- E)+"\n")
 
 def det_trian_matr(A):
 	mul = 1
@@ -43,7 +53,7 @@ def to_trian(Ab, N):
 			else:
 				m[i,j]=-A[i,j]/A[j,j]
 		A = m.dot(A)
-	print(A)
+	#print(A)
 	mul*=A[N-1,N-1]
 	return A, mul
 
@@ -76,9 +86,6 @@ def gauss_rev(A, b, TF, N):
 
 
 np.set_printoptions(threshold=np.nan)
-
-#A = np.matrix([[1,-1,1,-1],[-1,5,-3,3],[1,-3,-7,1],[-1,3,1,10]])
-#b = np.array([2,-4,-18,-5])
 
 
 def squares_meth(A, b, N):
@@ -122,6 +129,7 @@ def jacobi(A, b, N):
 	count = 0
 	while np.linalg.norm(x1-x0)>EPS:
 		x0 = x1.copy()
+		#print(x0)
 		x1 = np.array([0. for i in range(N)])
 		for i in range(N):
 			sum = 0
@@ -132,16 +140,13 @@ def jacobi(A, b, N):
 					sum -=(A[i,j]/A[i,i])*x0[j]
 			x1[i] = sum + b[i]/A[i,i]
 		count +=1
-		#print(x1)
 	y1 = np.array([A[0,j] for j in range(N)])
-
-	#print(y1.dot(x1.transpose())-b[0])
 	return x1, count
 
 def main():
 	f = open('output.txt', 'w')
-	N = 4
-	m = 4
+	N = 10
+	m = 10
 	A = np.zeros((N,N))
 	E = np.eye(N)
 	b = np.array([pow(i,2) - N for i in range(N)])
@@ -155,23 +160,21 @@ def main():
 	gauss_res, detA =to_trian(Ab, N)
 	A11 = gauss_res[:,:-1]
 	b11 = gauss_res[:,-1]
-	#print(A11, b11)
 
-	#f.write("Gauss result:\n" + print_matr(gauss_res))
-	#print(gauss_rev(gauss_res))
-	#detA = det_trian_matr(gauss_res)
-	#print("________________________\n", detA)
 	x1 = squares_meth(A, b, N)
 	x2, count = jacobi(A, b, N)
-	#print(Ab)
-	#print(A)
-	#print("A = \n", A, "\n","b = \n", b)
-	""""""
+
+	delta, delta_matr, x_per = perturbation(A,b,x1,N, 0.1)
+	print(delta, x_per, end = '\n')
 	print_results(f, A, b, x1, N)
 	gauss_res_final = gauss_rev(A11, b11, True, N)
+
+	f.write("perturbation of vectors = " + str(delta) + "\n")
+	f.write("perturbation of matrices = " + str(delta_matr) + "\n")
 	print("solution by gauss: \n", gauss_res_final)
 	print("solution by squares method: \n", x1)
 	print("solution by Jacobi method: \n", x2, "\n" , count)
+	
 	f.write("solution by gauss: \n" +str(gauss_res_final) +"\n")
 	f.write("solution by squares method: \n" +str(x1)+"\n")
 	f.write("solution by Jacobi method: \n"+str(x2) + "\n" +"count of iterations = " +str(count)+"\n")
