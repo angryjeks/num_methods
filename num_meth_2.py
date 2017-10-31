@@ -2,15 +2,62 @@ import numpy as np
 from math import pow
 
 #Num = 4
-EPS = pow(10, -8)
+EPS = pow(10, -4)
+
+def inverse_from_triang(A,N):
+	B = A.copy()
+	B[N-1] = B[N-1]/B[N-1,N-1] 
+	for i in range(N):
+		B[i] = B[i]
+	print(B)
+	for i in reversed(range(N-1)):
+		for j in reversed(range(i+1,N)):
+			B[i] = B[i]-(B[j])*B[i,j]
+	print(B[:,N:])
+	return B[:,N:]
+
+def vector_mul(a, b):
+	ab = 0
+	for i in range(a.shape[0]):
+		ab += a[i]*b[i]
+	return ab
+
+def matrix_mul(A, B):
+	A1 = A.copy()
+	B1 = B.copy()
+	try:
+		n, m = A1.shape[0], A1.shape[1]
+		q, p = B1.shape[0], B1.shape[1]
+	except:
+		#pass
+		AB = np.array([0. for i in range(B.shape[0])])
+		for i in range(n):
+			AB[i] = vector_mul(A1[i],B1)
+		return AB
+	AB = np.zeros((n, p))
+	for i in range(n):
+		for j in range(p):
+			AB[i,j] = vector_mul(A1[i],B1[:,j])
+	return AB
+
 
 def print_matr(A):
 	s = ""
-	for i in range(np.shape(A)[0]):
-		for j in range(np.shape(A)[1]):
-			s += str(A[i,j].round(5)) + " | "
-		s +="\n"
+	for i in range(A.shape[0]):
+		for j in range(A.shape[1]):
+			A[i,j] = A[i,j].round(4)
+		#s +="\n"
 	return s
+
+def norm_matrix(A):
+	norm = 0
+	for i in range(A.shape[0]):
+		for j in range(A.shape[1]):
+			norm +=A[i,j]*A[i,j]
+	return pow(norm, 1/2)
+
+def cond(A, A1):
+	return norm_matrix(A)*norm_matrix(A1)
 
 def perturbation(A, b, x, N, perturbation):
 	A1 = np.copy(A)
@@ -23,17 +70,18 @@ def perturbation(A, b, x, N, perturbation):
 	delta_matr = np.linalg.norm(A1-A)/np.linalg.norm(A)
 	return delta, delta_matr, x1
 
-def print_results(f, A, b,x, N):
-	A1 = np.linalg.inv(A)
+def print_results(f, A,A1, b,x, N):
+	A1 = A1
 	E = np.eye(N)
 	f.write("A = \n" + str(A)+ "\n")
 	f.write("b = \n" + str(b) + "\n")
-	f.write("Ax-b = \n" + str(A.dot(x)-b) +"\n")
+	f.write("r = Ax-b = \n" + str(matrix_mul(A,x)-b) +"\n")
 	f.write("det(A) = "+ str(np.linalg.det(A))+"\n")
 	f.write("A^-1 = \n"+ str(A1)+"\n")
-	f.write("A^(-1)*A = \n"+ str(A1.dot(A))+"\n")
-	f.write("cond(A) = "+ str(np.linalg.cond(A))+"\n")
-	f.write("A^(-1)*A - E = " + "\n" + str(A1.dot(A)- E)+"\n")
+	f.write("A^(-1)*A = \n"+ str(matrix_mul(A1, A))+"\n")
+	f.write("cond(A) = "+ str(cond(A, A1))+"\n")
+	#f.write(str(norm_matrix(A)*norm_matrix(A1)) + '\n')
+	f.write("A^(-1)*A - E = " + "\n" + str(matrix_mul(A1,A)- E)+"\n")
 
 def det_trian_matr(A):
 	mul = 1
@@ -52,7 +100,7 @@ def to_trian(Ab, N):
 				mul*=A[i,i]
 			else:
 				m[i,j]=-A[i,j]/A[j,j]
-		A = m.dot(A)
+		A = matrix_mul(m,A)
 	#print(A)
 	mul*=A[N-1,N-1]
 	return A, mul
@@ -85,7 +133,7 @@ def gauss_rev(A, b, TF, N):
 	return x
 
 
-np.set_printoptions(threshold=np.nan)
+np.set_printoptions(precision = 4, linewidth = 120,  suppress = True)
 
 
 def squares_meth(A, b, N):
@@ -117,7 +165,7 @@ def squares_meth(A, b, N):
 		bs = 0
 		boll = True
 	St = S.transpose()
-	STD = St.dot(D)
+	STD = matrix_mul(St, D)
 	y = gauss_rev(STD, b, False, N)
 	x = gauss_rev(S, y, True, N)
 	return x
@@ -145,7 +193,7 @@ def jacobi(A, b, N):
 
 def main():
 	f = open('output.txt', 'w')
-	N = 10
+	N = 25
 	m = 10
 	A = np.zeros((N,N))
 	E = np.eye(N)
@@ -157,6 +205,11 @@ def main():
 			else:
 				A[i,i] = N + m + j/m + i/N
 	Ab = np.column_stack((A,b))
+	Ac = np.column_stack((A,E))
+	Ac_res = to_trian(Ac, N)[0]
+	A1 = inverse_from_triang(Ac_res, N)
+	#print(Ac_res)
+	#f.write(str(Ac_res) + '\n')
 	gauss_res, detA =to_trian(Ab, N)
 	A11 = gauss_res[:,:-1]
 	b11 = gauss_res[:,-1]
@@ -164,9 +217,11 @@ def main():
 	x1 = squares_meth(A, b, N)
 	x2, count = jacobi(A, b, N)
 
+
 	delta, delta_matr, x_per = perturbation(A,b,x1,N, 0.1)
 	print(delta, x_per, end = '\n')
-	print_results(f, A, b, x1, N)
+	print(norm_matrix(A), "    ", np.linalg.norm(A))
+	print_results(f, A,A1, b, x1, N)
 	gauss_res_final = gauss_rev(A11, b11, True, N)
 
 	f.write("perturbation of vectors = " + str(delta) + "\n")
