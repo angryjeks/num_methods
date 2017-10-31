@@ -56,6 +56,12 @@ def norm_matrix(A):
 			norm +=A[i,j]*A[i,j]
 	return pow(norm, 1/2)
 
+def norm_vector(x):
+	norm = 0
+	for i in range(x.shape[0]):
+		norm +=x[i]*x[i]
+	return pow(norm, 1/2)
+
 def cond(A, A1):
 	return norm_matrix(A)*norm_matrix(A1)
 
@@ -66,8 +72,8 @@ def perturbation(A, b, x, N, perturbation):
 		A1[i,i] = A[i,i]*(1.0 + perturbation)
 	print(A1)
 	x1 = squares_meth(A1,b,N)
-	delta = np.linalg.norm(x1-x)/np.linalg.norm(x)
-	delta_matr = np.linalg.norm(A1-A)/np.linalg.norm(A)
+	delta = norm_vector(x1-x)/norm_vector(x)
+	delta_matr = norm_matrix(A1-A)/norm_matrix(A)
 	return delta, delta_matr, x1
 
 def print_results(f, A,A1, b,x, N):
