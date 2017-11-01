@@ -2,7 +2,7 @@ import numpy as np
 from math import pow
 
 #Num = 4
-EPS = pow(10, -4)
+EPS = pow(10, -8)
 
 def inverse_from_triang(A,N):
 	B = A.copy()
@@ -29,7 +29,6 @@ def matrix_mul(A, B):
 		n, m = A1.shape[0], A1.shape[1]
 		q, p = B1.shape[0], B1.shape[1]
 	except:
-		#pass
 		AB = np.array([0. for i in range(B.shape[0])])
 		for i in range(n):
 			AB[i] = vector_mul(A1[i],B1)
@@ -50,17 +49,28 @@ def print_matr(A):
 	return s
 
 def norm_matrix(A):
-	norm = 0
+	max1 = 0
 	for i in range(A.shape[0]):
+		max2 = 0
 		for j in range(A.shape[1]):
-			norm +=A[i,j]*A[i,j]
-	return pow(norm, 1/2)
+			max2 +=abs(A[i,j])
+		if max2 >= max1:
+			max1 = max2
+	return max1
 
-def norm_vector(x):
+"""def norm_vector(x):
 	norm = 0
 	for i in range(x.shape[0]):
 		norm +=x[i]*x[i]
 	return pow(norm, 1/2)
+"""
+
+def norm_vector(x):
+	norm = 0
+	for i in range(x.shape[0]):
+		if abs(x[i]) > norm:
+			norm = abs(x[i])
+	return norm
 
 def cond(A, A1):
 	return norm_matrix(A)*norm_matrix(A1)
@@ -76,13 +86,13 @@ def perturbation(A, b, x, N, perturbation):
 	delta_matr = norm_matrix(A1-A)/norm_matrix(A)
 	return delta, delta_matr, x1
 
-def print_results(f, A,A1, b,x, N):
+def print_results(f, A, detA, A1 , b,x, N):
 	A1 = A1
 	E = np.eye(N)
 	f.write("A = \n" + str(A)+ "\n")
 	f.write("b = \n" + str(b) + "\n")
 	f.write("r = Ax-b = \n" + str(matrix_mul(A,x)-b) +"\n")
-	f.write("det(A) = "+ str(np.linalg.det(A))+"\n")
+	f.write("det(A) = "+ str(detA)+"\n")
 	f.write("A^-1 = \n"+ str(A1)+"\n")
 	f.write("A^(-1)*A = \n"+ str(matrix_mul(A1, A))+"\n")
 	f.write("cond(A) = "+ str(cond(A, A1))+"\n")
@@ -139,7 +149,7 @@ def gauss_rev(A, b, TF, N):
 	return x
 
 
-np.set_printoptions(precision = 4, linewidth = 120,  suppress = True)
+np.set_printoptions( linewidth = 120)
 
 
 def squares_meth(A, b, N):
@@ -181,9 +191,8 @@ def jacobi(A, b, N):
 	x0 = np.array([b[i]/A[i,i] for i in range(N)])
 	x1 = np.array([0. for i in range(N)])
 	count = 0
-	while np.linalg.norm(x1-x0)>EPS:
+	while norm_vector(x1-x0)>EPS:
 		x0 = x1.copy()
-		#print(x0)
 		x1 = np.array([0. for i in range(N)])
 		for i in range(N):
 			sum = 0
@@ -199,7 +208,7 @@ def jacobi(A, b, N):
 
 def main():
 	f = open('output.txt', 'w')
-	N = 25
+	N = 10
 	m = 10
 	A = np.zeros((N,N))
 	E = np.eye(N)
@@ -226,8 +235,8 @@ def main():
 
 	delta, delta_matr, x_per = perturbation(A,b,x1,N, 0.1)
 	print(delta, x_per, end = '\n')
-	print(norm_matrix(A), "    ", np.linalg.norm(A))
-	print_results(f, A,A1, b, x1, N)
+	#print(norm_matrix(A), "    ", np.linalg.norm(A))
+	print_results(f, A,detA, A1, b, x1, N)
 	gauss_res_final = gauss_rev(A11, b11, True, N)
 
 	f.write("perturbation of vectors = " + str(delta) + "\n")
@@ -239,6 +248,7 @@ def main():
 	f.write("solution by gauss: \n" +str(gauss_res_final) +"\n")
 	f.write("solution by squares method: \n" +str(x1)+"\n")
 	f.write("solution by Jacobi method: \n"+str(x2) + "\n" +"count of iterations = " +str(count)+"\n")
+	f.write("r = Ax - b for Jacobi method : \n" + str(matrix_mul(A,x2) - b) + "\n"+ "EPS = " + str(EPS))
 	f.close()
 	#print(x2-x1)
 
