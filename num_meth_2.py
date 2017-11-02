@@ -4,6 +4,17 @@ from math import pow
 #Num = 4
 EPS = pow(10, -8)
 
+def build_matrix(N,m):
+	A = np.zeros((N,N))
+	b = np.array([pow(i,2) - N for i in range(N)])
+	for i in range(N):
+		for j in range(N):
+			if i != j:
+				A[i,j] = (i+j)/(m+N)
+			else:
+				A[i,i] = N + m + j/m + i/N
+	return A,b
+
 def inverse_from_triang(A,N):
 	B = A.copy()
 	B[N-1] = B[N-1]/B[N-1,N-1] 
