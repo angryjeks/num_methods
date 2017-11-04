@@ -1,7 +1,7 @@
-from num_meth_2 import matrix_mul, build_matrix, norm_vector, vector_mul
+from num_meth_2 import matrix_mul, build_matrix, norm_vector_fro, vector_mul
 import numpy as np
 
-EPS = 10**(-4)
+EPS = 10**(-6)
 
 np.set_printoptions( suppress = True,linewidth = 120)
 
@@ -11,12 +11,12 @@ def dot_product_method(A, N):
 	mu = 0
 	_norm = 10
 	x = np.array([-2 for i in range(N)])
-	e_vec = x/norm_vector(x)
+	e_vec = x/norm_vector_fro(x)
 	while _norm > EPS:
 		count+=1
 		x = matrix_mul(A1, e_vec)
 		mu1 = vector_mul(x, e_vec)
-		e_vec = x/norm_vector(x)
+		e_vec = x/norm_vector_fro(x)
 		print(e_vec, mu1)
 		_norm = abs(mu1 - mu)
 		mu = mu1

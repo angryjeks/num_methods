@@ -69,12 +69,12 @@ def norm_matrix(A):
 			max1 = max2
 	return max1
 
-"""def norm_vector(x):
+def norm_vector_fro(x):
 	norm = 0
 	for i in range(x.shape[0]):
 		norm +=x[i]*x[i]
 	return pow(norm, 1/2)
-"""
+
 
 def norm_vector(x):
 	norm = 0
