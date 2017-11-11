@@ -1,11 +1,11 @@
 from num_meth_2 import matrix_mul, build_matrix, norm_vector_fro, vector_mul
 import numpy as np
 
-EPS = 10**(-6)
+EPS = 10**(-8)
 
 np.set_printoptions( suppress = True,linewidth = 120)
 
-def dot_product_method(A, N):
+def dot_product_method(A, N, T = False):
 	A1 = A.copy()
 	count = 0
 	mu = 0
@@ -19,6 +19,12 @@ def dot_product_method(A, N):
 		e_vec = x/norm_vector_fro(x)
 		_norm = abs(mu1 - mu)
 		mu = mu1
+	if T:
+		B = mu1*np.eye(N) - A1
+		mu2, count2= dot_product_method(B, N)
+		mu2 = mu1 - mu2
+		return mu1,mu2, count
+
 	return mu1, count
 
 def find_max_element_up_matrix(A,N):
@@ -62,14 +68,14 @@ def main():
 	N = 10
 	m = 10
 	A, b = build_matrix(N,m)
-	_lambda, count_dot_product = dot_product_method(A,N)
+	_lambda, _lambda_min,count_dot_product = dot_product_method(A,N,True)
 	A1_jacobi, H1_jacobi, count_jacobi, _max_lambda = jacobi_eigenvalue(A,N)
 	with open("output_laba3.txt", 'w') as f:
 		f.write("A = \n" + str(A)+"\n")
 		f.write("Jacobi eigenvalue method results: \n" + "A1 = \n" + str(A1_jacobi) + "\n" + "H1 = \n" + str(H1_jacobi) + "\n" +"count of iterations = " + str(count_jacobi) + "\n")
 		f.write("max lambda by Jacobi method = " + str(_max_lambda)+"\n")
 		f.write("______________________________________________________\n")
-		f.write("Dot product method results: \n" + "max eigenvalue = " + str(_lambda) + "\n" + "count of iterations = " + str(count_dot_product) + "\n")
+		f.write("Dot product method results: \n" + "max |eigenvalue| = " + str(_lambda) + "\n" + "min |eigenvalue| = " + str(_lambda_min) + "\n" +"count of iterations = " + str(count_dot_product) + "\n")
 
 if __name__ == '__main__':
 	main()
