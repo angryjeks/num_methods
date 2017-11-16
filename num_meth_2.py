@@ -1,7 +1,6 @@
 import numpy as np 
 from math import pow
 
-#Num = 4
 EPS = pow(10, -8)
 
 def build_matrix(N,m):
@@ -88,11 +87,11 @@ def cond(A, A1):
 
 def perturbation(A, b, x, N, perturbation):
 	A1 = np.copy(A)
-	print(A1)
+	#print(A1)
 	for i in range(N):
 		A1[i,i] = A[i,i]*(1.0 + perturbation)
-	print(A1)
-	x1 = squares_meth(A1,b,N)
+	#print(A1)
+	x1, pop, pop1 = squares_meth(A1,b,N)
 	delta = norm_vector(x1-x)/norm_vector(x)
 	delta_matr = norm_matrix(A1-A)/norm_matrix(A)
 	return delta, delta_matr, x1
@@ -160,7 +159,7 @@ def gauss_rev(A, b, TF, N):
 	return x
 
 
-np.set_printoptions( linewidth = 120)
+np.set_printoptions(precision = 10, linewidth = 120)
 
 
 def squares_meth(A, b, N):
@@ -191,13 +190,37 @@ def squares_meth(A, b, N):
 		m = 0
 		bs = 0
 		boll = True
-	St = S.transpose()
+	S1 = S.copy()
+	St = S1.transpose()
 	STD = matrix_mul(St, D)
+	REV = squares_reverse_matrix(STD, S, N)
+	DET = determinant(S,D,N)
+	#print(DET)
+	#STD1 = np.linalg.inverse()
 	y = gauss_rev(STD, b, False, N)
 	x = gauss_rev(S, y, True, N)
-	return x
+	return x, REV, DET
+
+
+def squares_reverse_matrix(STD1, S1, N):
+	STD = STD1.copy()
+	S = S1.copy()
+	E = np.eye(N)
+	REV = np.zeros((N,N))
+	for i in range(N):
+		b = E[i]
+		y = gauss_rev(STD, b, False, N)
+		x = gauss_rev(S, y, True, N)
+		REV[:,i] = x
+	return REV
 	
-	
+def determinant(S,D, N):
+	_mul = 1
+	for i in range(N):
+		_mul*= D[i,i]
+		_mul*= S[i,i]*S[i,i]
+	return _mul
+
 def jacobi(A, b, N):
 	x0 = np.array([b[i]/A[i,i] for i in range(N)])
 	x1 = np.array([0. for i in range(N)])
@@ -233,19 +256,19 @@ def main():
 	Ab = np.column_stack((A,b))
 	Ac = np.column_stack((A,E))
 	Ac_res = to_trian(Ac, N)[0]
-	A1 = inverse_from_triang(Ac_res, N)
+	#A1 = inverse_from_triang(Ac_res, N)
 	#print(Ac_res)
 	#f.write(str(Ac_res) + '\n')
-	gauss_res, detA =to_trian(Ab, N)
+	gauss_res, detA1 =to_trian(Ab, N)
 	A11 = gauss_res[:,:-1]
 	b11 = gauss_res[:,-1]
 
-	x1 = squares_meth(A, b, N)
+	x1, A1, detA = squares_meth(A, b, N)
 	x2, count = jacobi(A, b, N)
 
 
 	delta, delta_matr, x_per = perturbation(A,b,x1,N, 0.1)
-	print(delta, x_per, end = '\n')
+	#print(delta, x_per, end = '\n')
 	#print(norm_matrix(A), "    ", np.linalg.norm(A))
 	print_results(f, A,detA, A1, b, x1, N)
 	gauss_res_final = gauss_rev(A11, b11, True, N)
