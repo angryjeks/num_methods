@@ -7,14 +7,14 @@ from num_meth_2 import sign
 
 np.set_printoptions(linewidth = 120)
 
-N = 10
+N = 8
 a, b = 0, 2
 y = 2*np.exp(2)/3
 y_max = np.exp(2)
 EPS = pow(10, -10)
-polinom_str = '$P_n (x)$'
-f_str = '$f (x)$'
-polinom_f = '$f(x) - P_n (x)$'
+polinom_str = 'P_n (x)'
+f_str = 'cos(\pi x)^2 e^x'
+polinom_f = '{} - {}'.format(f_str, polinom_str)
 
 def f(x):
 	return np.cos(np.pi*x)**2*np.exp(x)
@@ -34,6 +34,7 @@ class Interpolation:
 			self.__string = "Chebyshev's nodes"
 		else:
 			print("wrong type of nodes")
+			return 0
 		
 		self.__y = np.array([func(x) for x in self.__x])
 		self.__N = N
@@ -62,9 +63,9 @@ class Interpolation:
 		x1_l = np.linspace(self.get_a(), self.get_b(),1000)
 		y1_l = np.array([self(x) for x in x1_l])
 		y2_l = np.array([self._func(x) for x in x1_l])
-		plt.plot(x1_l, y1_l, c = 'blue', label = r''+polinom_str)
-		plt.plot(x1_l, y2_l, c = 'green', label = r''+f_str)
-		plt.plot(x1_l, y1_l-y2_l, c = 'purple', label = r''+polinom_f)
+		plt.plot(x1_l, y1_l, c = 'blue', label = r'${}$'.format(polinom_str))
+		plt.plot(x1_l, y2_l, c = 'green', label = r'${}$'.format(f_str))
+		plt.plot(x1_l, y1_l-y2_l, c = 'purple', label = r'${}$'.format(polinom_f))
 		plt.title("Number of numbers = " + str(N) + "\n" + self.get_string())
 		plt.xlabel("x")
 		plt.ylabel("y")
@@ -121,7 +122,6 @@ class Polinom:
 
 	def _evaluate(self, x0):
 		_sum = self.__coefs[0]
-		#print(self.__coefs)
 		for i in range(1, N+1):
 			_mul = 1
 			for j in range(i-1):
@@ -145,7 +145,6 @@ def useless_dichotomy(a, b, polinom, y,eps):
             a = x0
         else:
             b = x0
-    print(polinom._evaluate(x0))
     return x0
 
 def cheb(k, n):
@@ -158,7 +157,7 @@ def main():
 	cheb1.create_canvas(0)
 	equal.create_canvas(1)
 	x = equal.reverse_interpolation(y)
-	print(x, f(x), y)
+	print("x = {}\nf(x) = {}\ny = {}\n|f(x) - y| = {}".format(x, f(x), y, abs(f(x) - y)))
 	plt.tight_layout()
 	plt.savefig("picture.png")
 	plt.show()
