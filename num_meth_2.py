@@ -195,8 +195,6 @@ def squares_meth(A, b, N):
 	STD = matrix_mul(St, D)
 	REV = squares_reverse_matrix(STD, S, N)
 	DET = determinant(S,D,N)
-	#print(DET)
-	#STD1 = np.linalg.inverse()
 	y = gauss_rev(STD, b, False, N)
 	x = gauss_rev(S, y, True, N)
 	return x, REV, DET
